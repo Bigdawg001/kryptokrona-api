@@ -7,7 +7,11 @@
     kryptokrona_api_name: kryptokrona_api
 
     # Docker GitHub Container Registry
-    docker_image: "ghcr.io/mjovanc/kryptokrona-api"
+    docker_image_backend: "ghcr.io/kryptokrona/kryptokrona-api"
+    docker_image_monitor: "ghcr.io/kryptokrona/kryptokrona-api-monitor"
+
+    # Docker hub Container Registry
+    docker_image_node: "jrkalf/kryptokrona-node"
 
     # A list of users who will be added to the docker group.
     docker_users: [
@@ -15,6 +19,8 @@
     ]
 
     docker_container_name: kryptokrona-api
+    docker_container_name_monitor: kryptokrona-monitor
+    docker_container_name_node: kryptokrona-node
     docker_network_name: kryptokrona
 
     # Docker daemon options as a dict
@@ -29,23 +35,25 @@
           env: prod
 
     node_exporter_version: "{{ exporter_version }}"
-
     website_name: kryptokrona_api
     web_server_ip: "{{ domain_name }}"
     web_server_port: "443"
     hidden_service_port: "443"
 
-    # DO NOT CONFIGURE THE ABOVE YOURSELF
-    sys_api_title: "Kryptokrona API"
-    sys_api_description: "Kryptokrona API in Java for obtaining cached data from the Kryptokrona Blockchain."
-    sys_api_contact_name: "Marcus Cvjeticanin"
-    sys_api_contact_email: "mjovanc@icloud.com"
-    sys_api_contact_url: "https://github.com/mjovanc/kryptokrona-api"
+    # node to pick data from
+    # TODO we should set localhost later here when we deployed our own node
+    node_hostname: "blocksum.org"
+    node_port: "11898"
+    node_ssl: "false"
 
   roles:
   #- base
   - postgres
   - docker
+  - node
+  - liquibase
+  - backend
+  - monitor
   - nginx
   - prometheus
   - onion

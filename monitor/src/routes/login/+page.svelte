@@ -2,13 +2,12 @@
   import BlueButton from "../../components/buttons/BlueButton.svelte";
   import GreenButton from "../../components/buttons/GreenButton.svelte";
   import { login } from "../../api/login";
-  import { goto } from "$app/navigation";
   import { user } from "../../stores/user";
+
   let email;
 
-  function onLogin() {
-    $user = login(email);
-    goto("/");
+  async function onLogin() {
+    $user = await login(email);
   }
 </script>
 

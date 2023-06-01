@@ -11,14 +11,16 @@ val ktorm_version: String by project
 val liquibase_core: String by project
 val ktorm_jackson_version: String by project
 val slf4j_version: String by project
+val kryptokrona_version: String by project
+val prometheus_version: String by project
 
 plugins {
     application
-    kotlin("jvm") version "1.8.10"
-    id("io.ktor.plugin") version "2.2.3"
-    id("org.jetbrains.kotlin.plugin.serialization") version "1.8.10"
+    kotlin("jvm") version "1.8.21"
+    id("io.ktor.plugin") version "2.3.1"
+    id("org.jetbrains.kotlin.plugin.serialization") version "1.8.21"
     id("java")
-    id("org.liquibase.gradle") version "2.1.1"
+    id("org.liquibase.gradle") version "2.2.0"
 }
 
 group = "org.kryptokrona.api"
@@ -29,6 +31,12 @@ application {
 
     val isDevelopment: Boolean = project.ext.has("development")
     applicationDefaultJvmArgs = listOf("-Dio.ktor.development=$isDevelopment")
+}
+
+ktor {
+    docker {
+        jreVersion.set(io.ktor.plugin.features.JreVersion.JRE_17)
+    }
 }
 
 repositories {
@@ -49,43 +57,55 @@ tasks.withType<KotlinCompile>().all {
 }
 
 dependencies {
-    // kryptokrona sdk
-    implementation("org.kryptokrona.sdk:kryptokrona-core:0.1.1")
-    implementation("org.kryptokrona.sdk:kryptokrona-http:0.1.1")
-    implementation("org.kryptokrona.sdk:kryptokrona-util:0.1.1")
+    // kryptokrona kotlin sdk
+    implementation("org.kryptokrona.sdk:kryptokrona-core:$kryptokrona_version")
+    implementation("org.kryptokrona.sdk:kryptokrona-http:$kryptokrona_version")
+    implementation("org.kryptokrona.sdk:kryptokrona-util:$kryptokrona_version")
 
-    // various
+    // ktor
     implementation("io.ktor:ktor-server-core-jvm:$ktor_version")
     implementation("io.ktor:ktor-server-content-negotiation-jvm:$ktor_version")
+    implementation("io.ktor:ktor-utils-jvm:$ktor_version")
+    implementation("io.ktor:ktor-client-core:$ktor_version")
+    implementation("io.ktor:ktor-client-cio:$ktor_version")
+    implementation("io.ktor:ktor-client-content-negotiation:$ktor_version")
     implementation("io.ktor:ktor-serialization-kotlinx-json-jvm:$ktor_version")
     implementation("io.ktor:ktor-server-servlet:$ktor_version")
-    implementation("org.ktorm:ktorm-support-postgresql:$ktorm_version")
-    implementation("org.postgresql:postgresql:$postgres_version")
+    implementation("io.ktor:ktor-server-openapi:$ktor_version")
+    implementation("io.ktor:ktor-server-metrics-micrometer:$ktor_version")
+    implementation("io.micrometer:micrometer-registry-prometheus:$prometheus_version")
     implementation("io.ktor:ktor-serialization-jackson-jvm:$ktor_version")
     implementation("io.ktor:ktor-server-netty-jvm:$ktor_version")
-    implementation("org.ktorm:ktorm-core:$ktorm_version")
-    implementation("io.ktor:ktor-server-config-yaml-jvm:2.2.3")
-    implementation("ch.qos.logback:logback-classic:$logback_version")
+    implementation("io.ktor:ktor-server-cors:$ktor_version")
+    implementation("io.ktor:ktor-server-config-yaml-jvm:2.3.1")
+    implementation("io.ktor:ktor-client-logging:$ktor_version")
+
+    // various
     implementation("org.ktorm:ktorm-jackson:$ktorm_jackson_version")
     implementation("org.slf4j:slf4j-api:$slf4j_version")
     implementation("org.slf4j:slf4j-simple:$slf4j_version")
     implementation("javax.xml.bind:jaxb-api:2.3.1")
+    implementation("com.jessecorbett:diskord-bot:4.0.1")
+    implementation("io.bkbn:kompendium-core:3.14.3")
 
     // database
+    implementation("org.ktorm:ktorm-support-postgresql:$ktorm_version")
+    implementation("org.postgresql:postgresql:$postgres_version")
+    implementation("org.ktorm:ktorm-core:$ktorm_version")
     implementation("org.apache.commons:commons-dbcp2:2.9.0")
 
     // liquibase
     liquibaseRuntime("org.liquibase:liquibase-core:$liquibase_core")
     liquibaseRuntime("org.postgresql:postgresql:$postgres_version")
-    liquibaseRuntime("info.picocli:picocli:4.6.3")
-    liquibaseRuntime("ch.qos.logback:logback-core:1.2.3")
-    liquibaseRuntime("ch.qos.logback:logback-classic:1.2.3")
-    liquibaseRuntime("javax.xml.bind:jaxb-api:2.2.4")
+    liquibaseRuntime("info.picocli:picocli:4.7.3")
+    liquibaseRuntime("ch.qos.logback:logback-core:1.4.7")
+    liquibaseRuntime("ch.qos.logback:logback-classic:1.4.7")
+    liquibaseRuntime("javax.xml.bind:jaxb-api:2.3.1")
 
-    runtimeOnly("com.squareup:kotlinpoet:0.7.0")
+    runtimeOnly("com.squareup:kotlinpoet:1.14.2")
 
     // testing
-    testImplementation("io.ktor:ktor-server-test-host-jvm:2.2.3")
+    testImplementation("io.ktor:ktor-server-test-host-jvm:2.3.1")
     testImplementation("io.ktor:ktor-server-tests-jvm:$ktor_version")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version")
 }

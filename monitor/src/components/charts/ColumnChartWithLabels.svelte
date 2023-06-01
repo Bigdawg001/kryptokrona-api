@@ -1,6 +1,7 @@
 <script>
   import { COLORS } from "../../helpers/colors";
   import { onMount } from "svelte";
+
   export let data = [];
   export let labels = [];
   export let id = "";
@@ -15,9 +16,6 @@
       fontFamily: "Roboto mono, sans-serif",
       toolbar: {
         show: false,
-      },
-      animations: {
-        enabled: false,
       },
     },
     stroke: {
@@ -40,6 +38,12 @@
     labels: labels,
     legend: {
       show: false,
+    },
+    plotOptions: {
+      bar: {
+        borderRadius: 2,
+        borderRadiusApplication: "end",
+      },
     },
   };
 

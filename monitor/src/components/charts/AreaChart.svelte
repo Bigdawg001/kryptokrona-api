@@ -1,9 +1,17 @@
 <script>
-  import { COLORS } from "../../helpers/colors";
   import { onMount } from "svelte";
+  import { COLORS } from "../../helpers/colors";
   export let data = [];
+  export let labels = [];
+  export let xFormatter = (value) => value;
+  export let yFormatter = (value) => value;
   export let id = "";
   export let colors = COLORS;
+  export let tooltipEnabled = false;
+
+  var chart;
+
+  $: update(data.data);
 
   var options = {
     series: data,
@@ -27,11 +35,22 @@
       type: "solid",
     },
     tooltip: {
-      enabled: false,
+      enabled: tooltipEnabled,
     },
     grid: {
       show: false,
     },
+    yaxis: {
+      labels: {
+        formatter: yFormatter,
+      },
+    },
+    xaxis: {
+      labels: {
+        formatter: xFormatter,
+      },
+    },
+    labels: labels,
     dataLabels: {
       enabled: false,
     },
@@ -40,11 +59,24 @@
     },
   };
 
-  onMount(async () => {
-    const ApexCharts = (await import("apexcharts")).default;
-    var chart = new ApexCharts(document.querySelector("#" + id), options);
-    chart.render();
+  const update = () => {
+    if (chart) {
+      chart.updateOptions({
+        series: data,
+        labels: labels,
+      });
+    }
+  };
+
+  onMount(() => {
+    render();
   });
+
+  async function render() {
+    const ApexCharts = (await import("apexcharts")).default;
+    chart = new ApexCharts(document.querySelector("#" + id), options);
+    chart.render();
+  }
 </script>
 
 <div {id} />

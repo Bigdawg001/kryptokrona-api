@@ -33,6 +33,7 @@ services:
     container_name: kryptokrona_api_monitor
     environment:
      PRIVATE_GITHUB_TOKEN: change-me
+     PROMETHEUS_URL: "http://prometheus/prometheus"
     ports:
       - "3000:3000"
     networks:
@@ -43,6 +44,8 @@ services:
     container_name: kryptokrona_api_backend
     environment:
       DB_URL: jdbc:postgresql://db:5432/kryptokrona_api_dev
+      DB_USERNAME: postgres
+      DB_PASSWORD: test1234
       NODE_HOSTNAME: techy.ddns.net
       NODE_PORT: 11898
       NODE_SSL: false
@@ -56,36 +59,45 @@ services:
   prometheus:
     image: prom/prometheus:latest
     container_name: kryptokrona_api_prometheus
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
     ports:
       - "9090:9090"
-
-  keycloak:
-    image: jboss/keycloak
-    container_name: kryptokrona_api_keycloak
-    restart: always
-    environment:
-      DB_VENDOR: h2
-      KEYCLOAK_USER: admin
-      KEYCLOAK_PASSWORD: password
-      PROXY_ADDRESS_FORWARDING: "true"
-    volumes:
-      - keycloak:/var/lib/keycloak/data
-      - ./keycloak/realm-export.json:/opt/jboss/keycloak/realm-export.json
-    expose:
-      - 11111
-    ports:
-      - "11111:11111"
-    command:
-      - "-b 0.0.0.0"
-      - "-Djboss.http.port=11111"
-      - "-Dkeycloak.import=/opt/jboss/keycloak/realm-export.json"
     networks:
       - kryptokrona_api_net
 
+  keycloak:
+    image: quay.io/keycloak/keycloak:latest
+    container_name: kryptokrona_api_keycloak
+    restart: always
+    environment:
+      KEYCLOAK_LOGLEVEL: DEBUG
+      DB_VENDOR: postgres
+      DB_USER: postgres
+      DB_DATABASE: kryptokrona_api_dev
+      DB_PASSWORD: test1234
+      DB_PORT: 5432
+      DB_ADDR: db
+      # comment these two lines below when starting it up second time (only for setting config)
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: test1234
+      KEYCLOAK_STATISTICS: all
+    links:
+      - db:postgres
+    ports:
+      - "18080:8080"
+      - "19990:9990"
+    command:
+      - start-dev
+    volumes:
+      - ./keycloak/realms:/opt/jboss/keycloak/imports
+    networks:
+      - kryptokrona_api_net
 
 volumes:
   db:
-  keycloak:
 
 networks:
   kryptokrona_api_net:

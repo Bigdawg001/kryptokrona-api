@@ -1,7 +1,8 @@
 <script>
-  import { COLORS } from "../../helpers/colors";
-  import { onMount } from "svelte";
-  export let data = [];
+    import {COLORS} from "../../helpers/colors";
+    import {onMount} from "svelte";
+
+    export let data = [];
   export let labels = [];
   export let id = "";
   export let colors = COLORS;
@@ -32,6 +33,9 @@
     },
     dataLabels: {
       enabled: false,
+    },
+    yaxis: {
+      opposite: true,
     },
     labels: labels,
   };

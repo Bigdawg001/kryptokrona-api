@@ -1,7 +1,8 @@
 <script>
-  import { COLORS } from "../../helpers/colors";
-  import { onMount } from "svelte";
-  export let data = [];
+    import {COLORS} from "../../helpers/colors";
+    import {onMount} from "svelte";
+
+    export let data = [];
   export let labels = [];
   export let id = "";
   export let colors = COLORS;
@@ -15,9 +16,6 @@
       fontFamily: "Roboto mono, sans-serif",
       toolbar: {
         show: false,
-      },
-      animations: {
-        enabled: false,
       },
     },
     stroke: {

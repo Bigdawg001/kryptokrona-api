@@ -5,35 +5,21 @@
 [![kotlin](https://img.shields.io/badge/kotlin-1.8.10-blue.svg?logo=kotlin)](http://kotlinlang.org)
 [![release](https://img.shields.io/github/v/release/kryptokrona/kryptokrona-api)](https://img.shields.io/github/v/release/kryptokrona/kryptokrona-api)
 [![license](https://img.shields.io/badge/License-BSD_3--Clause-blue.svg)](https://opensource.org/licenses/BSD-3-Clause)
-[![slack](https://badgen.net/badge/icon/slack?icon=slack&label)](https://join.slack.com/t/kryptokrona/shared_invite/zt-1qmt8cz9j-s~2RKYtFfshqeLC1dhU5aA)
 [![discord](https://img.shields.io/discord/562673808582901793?label=discord)](https://discord.gg/VTgsTGS9b7)
 
 Kryptokrona is a decentralized blockchain from the Nordic based on CryptoNote, which forms the basis for Monero, among others. CryptoNote is a so-called “application layer” protocol further developed by TurtleCoin that enables things like: private transactions, messages and arbitrary data storage, completely decentralized.
 
 Kryptokrona API in Kotlin, Ktor and Kryptokrona SDK for caching and processing data from the blockchain to provide faster access for services.
 
-## Table of Contents
-
-- [Development resources](#development-resources)
-- [Getting Help](#getting-help)
-- [Reporting Issues](#reporting-issues)
-- [Guides](#guides)
-- [Contribute](#contribute)
-  - [Pull Request](#pull-request)
-  - [Donate](#donate)
-- [Contributors](#contributors)
-- [License](#license)
-
-
 ## Development Resources
 
 - Web: https://kryptokrona.org
 - Docs: https://docs.kryptokrona.org
-- Mail: mjovanc@icloud.com
+- Mail: [mjovanc@icloud.com](mailto:mjovanc@icloud.com)
 - GitHub: https://github.com/kryptokrona/kryptokrona-api
-- Slack: https://join.slack.com/t/kryptokrona/shared_invite/zt-1qmt8cz9j-s~2RKYtFfshqeLC1dhU5aA
 - Discord: https://discord.gg/VTgsTGS9b7
 - Twitter: https://twitter.com/mjovanc
+- OpenAPI Specification (Dev): https://petstore.swagger.io/?url=http://localhost:8080/api/openapi.json#/
 
 ## Getting Help
 
@@ -59,11 +45,30 @@ Kryptokrona API uses GitHub’s integrated issue tracking system to record bugs 
 
 - If possible, try to create a test case or project that replicates the problem and attach it to the issue.
 
-## Guides
+## Deployment
 
-If you have made a guide of how to use the Kryptokrona API feel free to send a PR and add your link to a list below.
+Currently, we deploy to two servers, one for staging and one for production. The staging server is used for testing and replicating the production environment
+and the production server is obviously used for production.
 
-Official guide is coming soon.
+All endpoints are available on both servers. Check out the OpenAPI Specification for more information on how to use the API.
+
+If you want to deploy the API yourself you can checkout the ansible directory for how to run the Ansible playbook.
+
+### Staging
+
+To use the staging server you have three options:
+
+- Access the API: `https://stage.xkr.mjovanc.com/api/v{number}/{endppoint}`
+- Access the OpenAPI Specification: https://petstore.swagger.io/?url=https://stage.xkr.mjovanc.com/api/openapi.json#/
+- Access the monitor view: https://stage.xkr.mjovanc.com/monitor
+
+### Production
+
+To use the production server you have three options:
+
+- Access the API: `https://xkr.mjovanc.com/api/v{number}/{endppoint}`
+- Access the OpenAPI Specification: https://petstore.swagger.io/?url=https://xkr.mjovanc.com/api/openapi.json#/
+- Access the monitor view: https://xkr.mjovanc.com/monitor
 
 ## Contribute
 
@@ -95,7 +100,7 @@ NOTE: Remember to update existing diagrams if there is some bigger improvements 
 
 ### Donate
 
-XKR: SEKReXXU9aJPiwjX2XkpbK8ACMWbUNXcYPxUVSiUYpNdhj8Z2snEy8CjjorZUNyswQNfzAmVWuGksU72Sf3Kq79Zd3fJWHq4Nyx
+XKR: `SEKReXXU9aJPiwjX2XkpbK8ACMWbUNXcYPxUVSiUYpNdhj8Z2snEy8CjjorZUNyswQNfzAmVWuGksU72Sf3Kq79Zd3fJWHq4Nyx`
 
 ## Contributors
 
@@ -105,6 +110,21 @@ being awesome contributors to this project. **We'd like to take a moment to reco
 
 [<img src="https://github.com/mjovanc.png?size=72" alt="mjovanc" width="72">](https://github.com/mjovanc)
 [<img src="https://github.com/appelskrutt34.png?size=72" alt="appelskrutt34" width="72">](https://github.com/appelskrutt34)
+[<img src="https://github.com/renovatebot.png?size=72" alt="mjovanc" width="72">](https://github.com/renovatebot)
+[<img src="https://github.com/TechyGuy17.png?size=72" alt="TechyGuy" width="72">](https://github.com/TechyGuy17)
+
+## Powered by
+
+[<img src="https://github.com/kryptokrona/kryptokrona-api/blob/master/resources/poweredby/kotlin.png" alt="Kotlin" height="72">](https://github.com/JetBrains/kotlin)
+[<img src="https://github.com/kryptokrona/kryptokrona-api/blob/master/resources/poweredby/ktor.png" alt="Ktor" height="72">](https://github.com/ktorio/ktor)
+[<img src="https://github.com/kryptokrona/kryptokrona-api/blob/master/resources/poweredby/svelte.png" alt="Svelte" height="72">](https://github.com/sveltejs/svelte)
+[<img src="https://github.com/kryptokrona/kryptokrona-api/blob/master/resources/poweredby/liquibase.png" alt="Liquibase" height="72">](https://github.com/liquibase/liquibase)
+[<img src="https://github.com/kryptokrona/kryptokrona-api/blob/master/resources/poweredby/postgresql.png" alt="PostgreSQL" height="72">](https://github.com/postgres/postgres)
+[<img src="https://github.com/kryptokrona/kryptokrona-api/blob/master/resources/poweredby/prometheus.png" alt="Prometheus" height="72">](https://github.com/prometheus/prometheus)
+[<img src="https://github.com/kryptokrona/kryptokrona-api/blob/master/resources/poweredby/ansible.png" alt="Ansible" height="72">](https://github.com/ansible/ansible)
+[<img src="https://github.com/kryptokrona/kryptokrona-api/blob/master/resources/poweredby/docker.png" alt="Docker" height="72">](https://github.com/docker)
+[<img src="https://github.com/kryptokrona/kryptokrona-api/blob/master/resources/poweredby/keycloak.png" alt="Keycloak" height="72">](https://github.com/keycloak/keycloak)
+[<img src="https://github.com/kryptokrona/kryptokrona-api/blob/master/resources/poweredby/githubactions.png" alt="GitHub Actions" height="72">](https://github.com/actions)
 
 ## License
 

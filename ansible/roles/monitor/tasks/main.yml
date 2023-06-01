@@ -1,0 +1,17 @@
+---
+- name: Start Kryptokrona Monitor Container
+  docker_container:
+    name: "{{ docker_container_name_monitor }}"
+    image: "{{ docker_image_monitor }}:latest"
+    state: started
+    pull: true
+    force_kill: yes
+    recreate: yes
+    env: {
+      PRIVATE_GITHUB_TOKEN: "{{ vault_github_token }}",
+      VITE_KRYPTOKRONA_API: "https://{{ domain_name }}/api/v1/statistics",
+      VITE_PROMETHEUS_API: "https://{{ domain_name }}/prometheus"
+
+    }
+    networks:
+      - name: "host"

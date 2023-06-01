@@ -34,44 +34,27 @@ import io.ktor.server.application.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import org.kryptokrona.api.routes.*
+import org.kryptokrona.api.routes.statistics.postsEncryptedGroupStatisticsRoute
+import org.kryptokrona.api.routes.statistics.postsEncryptedStatisticsRoute
 
 fun Application.configureRouting() {
     routing {
-        get("/v1/test") {
-            call.respondText("Hello World!")
+        route("/api") {
+            get("/v1/test") {
+                call.respondText("Hello World!")
+            }
+            infoRoute()
+            blocksRoute()
+            hashratesRoute()
+            outputsRoute()
+            transactionsRoute()
+            nodesRoute()
+            poolsRoute()
+            postsEncryptedRoute()
+            postsEncryptedGroupRoute()
+            postsEncryptedStatisticsRoute()
+            postsEncryptedGroupStatisticsRoute()
+            suppliesRoute()
         }
-
-        blocksRoute()
-        blocksByIdRoute()
-
-        hashratesRoute()
-        hashratesByIdRoute()
-
-        outputsRoute()
-        outputsByIdRoute()
-
-        transactionsRoute()
-        transactionsByIdRoute()
-
-        infoRoute()
-        infoByIdRoute()
-
-        nodesRoute()
-        nodesByIdRoute()
-
-        poolsRoute()
-        poolsByIdRoute()
-
-        postsEncryptedRoute()
-        postsEncryptedByIdRoute()
-
-        postsEncryptedGroupRoute()
-        postsEncryptedGroupByIdRoute()
-
-        statisticsRoute()
-        statisticsByIdRoute()
-
-        suppliesRoute()
-        suppliesByIdRoute()
     }
 }

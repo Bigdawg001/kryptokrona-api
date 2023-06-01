@@ -1,19 +1,18 @@
 <script>
-  import TopNavButton from "./TopNavButton.svelte";
-  import { goto } from "$app/navigation";
-  import GreenButton from "../buttons/GreenButton.svelte";
-  import { user } from "../../stores/user";
-  export let repo;
+    import TopNavButton from "./TopNavButton.svelte";
+    import {base} from "$app/paths";
+
+    export let repo;
 </script>
 
-<nav class="top-nav flex pt-4 pb-4 " aria-label="main navigation">
+<nav class="top-nav flex pt-4 pb-4" aria-label="main navigation">
   <div class="w-1/6">
-    <a href="/" aria-label="front page">
-      <img src="./logo.png" class="w-36" alt="kryptokrona api logo" />
+    <a href={`${base}/`} aria-label="front page">
+      <img src={`${base}/logo.png`} class="w-36" alt="Kryptokrona API Logo" />
     </a>
   </div>
   <div class="w-4/5 flex justify-center">
-    {#if repo.latestVersion != undefined}
+    {#if repo.latestVersion !== undefined}
       <div class="  flex items-center gap-6">
         <div class="flex items-center">
           <i class="fa-brands fa-github" aria-hidden="true" />
@@ -72,26 +71,22 @@
     <TopNavButton
       iconClass="fa-solid fa-network-wired"
       label="nodes"
-      goTo="/nodes"
+      goTo={`${base}/nodes`}
     />
     <TopNavButton
       iconClass="fa-solid fa-water-ladder"
       label="pools"
-      goTo="/pools"
+      goTo={`${base}/pools`}
     />
-    {#if $user.email != null}
+    <!-- 
+    {#if $user.username != null}
       <TopNavButton
         iconClass="fa-solid fa-user"
         label="profile"
-        goTo="/profile"
+        goTo="{`${base}/profile`}"
       />
     {:else}
-      <GreenButton
-        text="Login"
-        action={() => {
-          goto("/login");
-        }}
-      />
-    {/if}
+      <GreenButton text="Login" action={login} />
+    {/if}-->
   </div>
 </nav>

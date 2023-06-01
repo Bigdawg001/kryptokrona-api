@@ -31,16 +31,6 @@ try:
     prometheus_metrics = requests.get(base_url.format(domain, 'metrics'))
     assert prometheus_metrics.status_code == requests.codes.ok
 
-    # trying hugin api dashboard
-    print('GET ' + base_url.format(domain, 'dashboard'))
-    dashboard = requests.get(base_url.format(domain, 'dashboard'))
-    assert dashboard.status_code == requests.codes.ok
-
-    # trying hugin api api docs
-    print('GET ' + base_url.format(domain, 'api/docs'))
-    api_docs = requests.get(base_url.format(domain, 'api/docs'))
-    assert api_docs.status_code == requests.codes.ok
-
     print('\nSMOKE TEST PASSED!')
 except (AssertionError, ConnectionError, Timeout, TooManyRedirects):
     print('Smoke Test Failed!')

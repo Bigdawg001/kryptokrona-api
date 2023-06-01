@@ -1,9 +1,11 @@
 <script>
   import { COLORS } from "../../helpers/colors";
   import { onMount } from "svelte";
+
   export let data = [];
   export let id = "";
   export let colors = COLORS;
+  export let tooltipEnabled = false;
 
   var options = {
     series: data,
@@ -13,9 +15,6 @@
       width: "100%",
       sparkline: {
         enabled: true,
-      },
-      animations: {
-        enabled: false,
       },
     },
     stroke: {
@@ -27,7 +26,7 @@
       type: "solid",
     },
     tooltip: {
-      enabled: false,
+      enabled: tooltipEnabled,
     },
     grid: {
       show: false,
@@ -37,6 +36,12 @@
     },
     legend: {
       show: false,
+    },
+    plotOptions: {
+      bar: {
+        borderRadius: 2,
+        borderRadiusApplication: "end",
+      },
     },
   };
 

@@ -1,9 +1,8 @@
 <script>
-  import { goto } from "$app/navigation";
-  import { user } from "../../stores/user";
-  import GreenButton from "../buttons/GreenButton.svelte";
+    import {goto} from "$app/navigation";
+    import {base} from "$app/paths";
 
-  let phoneMenu;
+    let phoneMenu;
   let show = false;
   export let repo;
 
@@ -63,18 +62,18 @@
 </div>
 <nav class="top-nav pt-4 pb-4" aria-label="main navigation">
   <div class="flex">
-    <a href="/">
-      <img src="./logo.png" class="w-36" alt="kryptokrona api" />
+    <a href={`${base}/`}>
+      <img src={`${base}/logo.png`} class="w-36" alt="kryptokrona api" />
     </a>
     <div class="flex justify-end w-full items-center">
       <button
         on:click={toggleMenu}
         class="
                     text-center
-                    relative 
+                    relative
                     bg-neutral-400
                     dark:bg-neutral-700
-                    rounded-md 
+                    rounded-md
                     py-1.5 px-2
                     mr-1"
         aria-label="toggle menu"
@@ -95,15 +94,17 @@
     <div class="flex flex-col gap-4">
       <button
         on:click={() => {
-          navigate("/nodes");
+          navigate(`${base}/nodes`);
         }}
         class="pt-4"><i class="fa-solid fa-network-wired" /> nodes</button
       >
       <button
         on:click={() => {
-          navigate("/pools");
-        }}><i class="fa-solid fa-water-ladder " /> pools</button
+          navigate(`${base}/pools`);
+        }}
+        class="pb-4"><i class="fa-solid fa-water-ladder" /> pools</button
       >
+      <!-- 
       {#if $user.email != null}
         <button
           on:click={() => {
@@ -119,7 +120,7 @@
             }}
           />
         </div>
-      {/if}
+      {/if}-->
     </div>
   </div>
 </nav>

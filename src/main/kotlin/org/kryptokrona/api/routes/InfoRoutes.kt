@@ -30,21 +30,69 @@
 
 package org.kryptokrona.api.routes
 
+import io.bkbn.kompendium.core.metadata.PostInfo
+import io.bkbn.kompendium.core.plugin.NotarizedRoute
+import io.ktor.http.*
 import io.ktor.server.application.*
+import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
-
-//TODO perhaps send data about which node is currently in use
-// and/or status of sync to node, perhaps also a percentage of how much is left to sync from the initial sync
+import org.kryptokrona.api.models.request.NodeRequest
+import org.kryptokrona.api.models.response.ExceptionResponse
+import org.kryptokrona.api.utils.Metrics
+import org.kryptokrona.api.utils.jsonObjectMapper
+import org.kryptokrona.sdk.http.client.NodeClient
+import org.kryptokrona.sdk.http.model.node.Info
+import org.kryptokrona.sdk.util.node.Node
 
 fun Route.infoRoute() {
-    get("/v1/info") {
-        call.respondText("Hello all info!")
+    route("/v1/info") {
+        route("/node") {
+            nodeDocumentation()
+
+            post {
+                val nodeRequest = call.receive<NodeRequest>()
+
+                val node = Node(nodeRequest.hostName, nodeRequest.port, nodeRequest.ssl)
+                val nodeClient = NodeClient(node)
+                val result = nodeClient.getNodeInfo()
+
+                val json = jsonObjectMapper().writeValueAsString(result)
+
+                call.respond(HttpStatusCode.OK, json)
+            }
+        }
+
+        // should not use docs since it will only get exposed to prometheus
+        route("/requests/metrics") {
+            get {
+                call.respond(Metrics.getRegistry().scrape())
+            }
+        }
     }
 }
 
-fun Route.infoByIdRoute() {
-    get("/v1/info/{id}") {
-        call.respond(mapOf("hello" to "info"))
+private fun Route.nodeDocumentation() {
+    install(NotarizedRoute()) {
+        tags = setOf("info")
+        post = PostInfo.builder {
+            summary("Get node info")
+            description("Gets a specific node information.")
+            response {
+                responseCode(HttpStatusCode.OK)
+                responseType<Info>()
+                description("Will return node information.")
+            }
+            canRespond {
+                responseType<ExceptionResponse>()
+                responseCode(HttpStatusCode.BadRequest)
+                description("Could not handle the request.")
+            }
+            canRespond {
+                responseType<ExceptionResponse>()
+                responseCode(HttpStatusCode.InternalServerError)
+                description("Some serious trouble is going on.")
+            }
+        }
     }
 }

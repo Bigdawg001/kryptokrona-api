@@ -5,20 +5,33 @@
 @layer base {
   h1 {
     font-weight: 700;
-    font-size: 1.875em !important;
+    font-size: 1.875em;
 
   }
   h2 {
     font-weight: 700;
-    font-size: 1.4em !important;
+    font-size: 1.4em;
 
   }
   h3 {
     font-weight: 700;
-    font-size: 1.25em !important;
+    font-size: 1.25em;
   }
 }
 
+@media (prefers-color-scheme: dark) {
+
+  .active {
+    outline: 1px solid white;
+  }
+}
+
+@media (prefers-color-scheme: light) {
+
+  .active {
+    outline: 1px solid #0a0a0a;
+  }
+ }
 
 
 .togglebox-hidden {

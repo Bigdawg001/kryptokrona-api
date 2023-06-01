@@ -2,80 +2,247 @@
   import { COLOR } from "../helpers/colors";
   import CircleChart from "../components/charts/CircleChart.svelte";
   import ToggleBox from "../components/toggle-box/ToggleBox.svelte";
-  import { chart1, chart4, chart5 } from "../mock-data/data";
-  import MultiItemsGrid from "../components/grids/MultiItemsGrid.svelte";
   import TitleAndTextContainer from "../components/containers/TitleAndTextContainer.svelte";
-  import AreaChartWithLabels from "../components/charts/AreaChartWithLabels.svelte";
-  import ChartWithTimeButtonsContainer from "../components/containers/ChartWithTimeButtonsContainer.svelte";
-  import MultiItemsGridFullWidthTablet from "../components/grids/MultiItemsGridFullWidthTablet.svelte";
-  import TitleAndTextContainerGreen from "../components/containers/TitleAndTextContainerGreen.svelte";
+  import Grid from "../components/grids/Grid.svelte";
+  import {
+    cpuUsageOverTime,
+    ramUsageOverTime,
+    diskUsageOverTime,
+    cpuUsage,
+    ramUsage,
+    diskUsage,
+    threads,
+    posts,
+    groupPosts,
+    totalPosts,
+    totalGroupPosts,
+  } from "../stores/data";
+  import { onMount, onDestroy } from "svelte";
+  import {
+    getCpuUsage,
+    getRamUsage,
+    getDiskUsage,
+    getRamUsageOverTime,
+    getCpuUsageOverTime,
+    getDiskUsageOverTime,
+    getThreads,
+  } from "../api/prometheus";
+  import { getPosts, getGroupPosts } from "../api/hugin";
+  import TimeIntervalChart from "../components/charts/TimeIntervalChart.svelte";
+  import {
+    getLocaleString,
+    getTwoDecimalsPercentage,
+    getZeroDecimalsPercentage,
+  } from "../helpers/helpers";
+  export let data;
+
+  $cpuUsage = data.prometheus.cpuUsage;
+  $ramUsage = data.prometheus.ramUsage;
+  $diskUsage = data.prometheus.diskUsage;
+  $cpuUsageOverTime = data.prometheus.cpuUsageOverTime;
+  $ramUsageOverTime = data.prometheus.ramUsageOverTime;
+  $diskUsageOverTime = data.prometheus.diskUsageOverTime;
+  $threads = data.prometheus.threads;
+  $posts = data.posts;
+  $groupPosts = data.groupPosts;
+  $totalPosts = data.totalPosts;
+  $totalGroupPosts = data.totalGroupPosts;
+
+  let fiveSecondInterval;
+  let oneSecondInterval;
+  let oneMinInterval;
+  let ramUsageOverTimeInterval = "1h";
+  let cpuUsageOverTimeInterval = "1h";
+  let diskUsageOverTimeInterval = "1h";
+  let postsInterval = "1w";
+  let groupPostsInterval = "1w";
+
+  onMount(() => {
+    fiveSecondInterval = setInterval(() => {
+      setRamUsageOverTime();
+      setCpuUsageOverTime();
+      setDiskUsageOverTime();
+    }, 1000 * 5);
+    oneSecondInterval = setInterval(() => {
+      setCpuUsage();
+      setRamUsage();
+      setDiskUsage();
+      setThreads();
+    }, 1000);
+  });
+
+  onDestroy(() => {
+    clearInterval(oneSecondInterval);
+    clearInterval(fiveSecondInterval);
+    clearInterval(oneMinInterval);
+  });
+
+  async function setCpuUsage() {
+    $cpuUsage = await getCpuUsage();
+  }
+  async function setRamUsage() {
+    $ramUsage = await getRamUsage();
+  }
+  async function setDiskUsage() {
+    $diskUsage = await getDiskUsage();
+  }
+  async function setCpuUsageOverTime(event) {
+    if (event) cpuUsageOverTimeInterval = event.detail.time;
+    $cpuUsageOverTime = await getCpuUsageOverTime(cpuUsageOverTimeInterval);
+  }
+  async function setRamUsageOverTime(event) {
+    if (event) ramUsageOverTimeInterval = event.detail.time;
+    $ramUsageOverTime = await getRamUsageOverTime(ramUsageOverTimeInterval);
+  }
+  async function setDiskUsageOverTime(event) {
+    if (event) diskUsageOverTimeInterval = event.detail.time;
+    $diskUsageOverTime = await getDiskUsageOverTime(diskUsageOverTimeInterval);
+  }
+  async function setThreads() {
+    $threads = await getThreads();
+  }
+
+  async function setPostsOverTime(event) {
+    if (event) postsInterval = event.detail.time;
+    $posts = {};
+    $posts = await getPosts(postsInterval);
+  }
+  async function setGroupPostsOverTime(event) {
+    if (event) groupPostsInterval = event.detail.time;
+    $groupPosts = {};
+    $groupPosts = await getGroupPosts(groupPostsInterval);
+  }
 </script>
 
-<div id="main" />
 <ToggleBox title={"Quick overview"}>
-  <MultiItemsGrid columns={5}>
-    <TitleAndTextContainer title="Threads" text="14" />
-    <TitleAndTextContainer title="Uptime" text="4 days" />
-    <TitleAndTextContainer title="CPU total" text="30%">
+  <Grid columns={5}>
+    <TitleAndTextContainer
+      title="Threads"
+      text={$threads.toString()}
+      bigText={true}
+    />
+    <TitleAndTextContainer
+      title="Uptime"
+      text={data.prometheus.uptime.toFixed(0) + " Days"}
+      bigText={true}
+    />
+    <TitleAndTextContainer title="CPU usage" text={$cpuUsage.toFixed(0) + "%"}>
       <div
         class="flex h-5/6 items-end justify-center absolute top-7 left-0 right-0"
       >
-        <CircleChart data={[30]} id="id8" />
+        <CircleChart data={[$cpuUsage]} id="cpuUsage" />
       </div>
     </TitleAndTextContainer>
-    <TitleAndTextContainer title="RAM total" text="50%">
+    <TitleAndTextContainer title="RAM usage" text={$ramUsage.toFixed(0) + "%"}>
       <div
         class="flex h-5/6 items-end justify-center absolute top-7 left-0 right-0"
       >
-        <CircleChart data={[50]} id="id9" />
+        <CircleChart data={[$ramUsage]} id="ramUsage" />
       </div>
     </TitleAndTextContainer>
-    <TitleAndTextContainer title="DISK total" text="40%">
+    <TitleAndTextContainer
+      title="DISK usage"
+      text={$diskUsage.toFixed(0) + "%"}
+    >
       <div
         class="flex h-5/6 items-end justify-center absolute top-7 left-0 right-0"
       >
-        <CircleChart data={[40]} id="id10" />
+        <CircleChart data={[$diskUsage]} id="diskUsage" />
       </div>
     </TitleAndTextContainer>
-  </MultiItemsGrid>
+  </Grid>
 </ToggleBox>
 
 <div class="mt-8" />
 
-<ToggleBox title={"History"}>
-  <MultiItemsGridFullWidthTablet columns={3} fullWidthOnPhone={true}>
-    <ChartWithTimeButtonsContainer title="CPU usage" height={"h-80"}>
-      <AreaChartWithLabels data={chart4.data} id={chart4.name} />
-    </ChartWithTimeButtonsContainer>
-
-    <ChartWithTimeButtonsContainer title="RAM usage" height={"h-80"}>
-      <AreaChartWithLabels
-        data={chart5.data}
-        id={chart5.name}
-        colors={[COLOR.VIOLET]}
-      />
-    </ChartWithTimeButtonsContainer>
-    <ChartWithTimeButtonsContainer title="DISK usage" height={"h-80"}>
-      <AreaChartWithLabels
-        data={chart1.data}
-        id={chart1.name}
-        colors={[COLOR.FUSCHIA]}
-      />
-    </ChartWithTimeButtonsContainer>
-  </MultiItemsGridFullWidthTablet>
+<ToggleBox title={"Server activity"}>
+  <Grid columns={3} gridClass="md-grid">
+    <TimeIntervalChart
+      data={[{ data: $cpuUsageOverTime.values, name: "CPU" }]}
+      labels={$cpuUsageOverTime.times}
+      id="cpuUsageOverTime"
+      title="CPU usage"
+      color={COLOR.BLUE}
+      xFormatter={getLocaleString}
+      yAxisFormatter={getZeroDecimalsPercentage}
+      yFormatterTooltip={getTwoDecimalsPercentage}
+      type="area"
+      on:updateTimeInterval={setCpuUsageOverTime}
+    />
+    <TimeIntervalChart
+      data={[{ data: $ramUsageOverTime.values, name: "RAM" }]}
+      labels={$ramUsageOverTime.times}
+      id="ramUsageOverTime"
+      title="RAM usage"
+      color={COLOR.BLUE}
+      xFormatter={getLocaleString}
+      yAxisFormatter={getZeroDecimalsPercentage}
+      yFormatterTooltip={getTwoDecimalsPercentage}
+      type="area"
+      on:updateTimeInterval={setRamUsageOverTime}
+    />
+    <TimeIntervalChart
+      data={[{ data: $diskUsageOverTime.values, name: "DISK" }]}
+      labels={$diskUsageOverTime.times}
+      id="diskUsageOverTime"
+      title="DISK usage"
+      color={COLOR.BLUE}
+      xFormatter={getLocaleString}
+      yAxisFormatter={getZeroDecimalsPercentage}
+      yFormatterTooltip={getTwoDecimalsPercentage}
+      type="area"
+      on:updateTimeInterval={setDiskUsageOverTime}
+    />
+  </Grid>
 </ToggleBox>
 
 <div class="mt-8" />
 
-<ToggleBox title={"Status"}>
-  <MultiItemsGrid columns={6} fullWidthOnPhone={true}>
-    <TitleAndTextContainerGreen title="Something" text="OK" />
-    <TitleAndTextContainerGreen title="Something" text="OK" />
-    <TitleAndTextContainerGreen title="Something" text="OK" />
-    <TitleAndTextContainer title="Something" text="OFFLINE" />
-    <TitleAndTextContainer title="Something" text="OFFLINE" />
-    <TitleAndTextContainerGreen title="Something" text="OK" />
-  </MultiItemsGrid>
+<ToggleBox title="Hugin activity">
+  <Grid columns={2} gridClass="md-grid">
+    {#if $posts.values}
+      <TimeIntervalChart
+        data={[{ data: $posts.values, name: "Private messages" }]}
+        labels={$posts.times}
+        id="posts"
+        title="Private messages"
+        color={COLOR.VIOLET}
+        activeInterval={postsInterval}
+        type="bar"
+        height="h-72"
+        on:updateTimeInterval={setPostsOverTime}
+      />
+    {:else}
+      <TitleAndTextContainer title="Private messages" height="h-72">
+        <div class="w-full h-full flex justify-center">
+          <div class="text-3xl pt-16">
+            <i class="fa-solid fa-spinner fa-spin-pulse" />
+          </div>
+        </div>
+      </TitleAndTextContainer>
+    {/if}
+    {#if $groupPosts.values}
+      <TimeIntervalChart
+        data={[{ data: $groupPosts.values, name: "Group messages" }]}
+        labels={$groupPosts.times}
+        id="groupPosts"
+        title="Group messages"
+        color={COLOR.VIOLET}
+        activeInterval={groupPostsInterval}
+        type="bar"
+        height="h-72"
+        on:updateTimeInterval={setGroupPostsOverTime}
+      />
+    {:else}
+      <TitleAndTextContainer title="Group messages" height="h-72">
+        <div class="w-full h-full flex justify-center">
+          <div class="text-3xl pt-16">
+            <i class="fa-solid fa-spinner fa-spin-pulse" />
+          </div>
+        </div>
+      </TitleAndTextContainer>
+    {/if}
+  </Grid>
 </ToggleBox>
 
 <div class="mt-8" />

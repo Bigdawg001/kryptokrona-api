@@ -13,7 +13,7 @@ jobs:
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       # Install python3 pip and ansible latest
       - name: Install python and ansible
@@ -21,7 +21,7 @@ jobs:
 
       # If `roles` folder exists, create a playbook_repo.yml playbook to perform the syntax check
       - name: Creating playbook_repo.yml from roles folder (if exists)
-        run: test -d "hugin-api/ansible/roles" || exit 0 && echo $LINE1 > playbook_repo.yml && echo $LINE2 >> playbook_repo.yml && printf "  roles:\n" >> playbook_repo.yml &&  for i in `ls hugin-api/ansible/roles`; do echo "  - $i" >> playbook_repo.yml; done
+        run: test -d "kryptokrona-api/ansible/roles" || exit 0 && echo $LINE1 > playbook_repo.yml && echo $LINE2 >> playbook_repo.yml && printf "  roles:\n" >> playbook_repo.yml &&  for i in `ls kryptokrona-api/ansible/roles`; do echo "  - $i" >> playbook_repo.yml; done
         env:
           LINE1: "---"
           LINE2: "- hosts: localhost"
@@ -66,10 +66,31 @@ jobs:
       - name: Assemble
         run: ./gradlew assemble
 
+      - name: Upload Build Directory Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: build-dir
+          path: ./build
+
   unit-test:
     name: Unit Test
     runs-on: ubuntu-latest
     needs: [ assemble ]
+
+    services:
+      postgres:
+        image: postgres:latest
+        env:
+          POSTGRES_DB: kryptokrona_api_dev
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: test1234
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
 
     steps:
       - uses: actions/checkout@v3
@@ -80,6 +101,9 @@ jobs:
           distribution: 'temurin'
           cache: 'gradle'
 
+      - name: Run Liquibase Migrations
+        run: ./gradlew update -PdbEnv=dev
+
       - name: Run Unit Test
         run: ./gradlew test
 
@@ -88,8 +112,8 @@ jobs:
     runs-on: ubuntu-latest
     needs: [ unit-test ]
     steps:
-      - uses: actions/checkout@v2
-      - uses: benjlevesque/short-sha@v1.2
+      - uses: actions/checkout@v3
+      - uses: benjlevesque/short-sha@v2.2
 
       - name: Download Build Directory
         uses: actions/download-artifact@v3

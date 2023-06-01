@@ -31,14 +31,19 @@
 package org.kryptokrona.api.plugins
 
 import io.ktor.server.application.*
-import kotlinx.coroutines.async
+import kotlinx.coroutines.launch
+import org.kryptokrona.api.syncers.DiscordSyncer
 import org.kryptokrona.api.syncers.HuginSyncer
+import org.kryptokrona.api.syncers.InitialSyncer
 
 fun Application.configureSyncers() {
+    launch { InitialSyncer().sync() }
+    launch { HuginSyncer().sync() }
 
-    // async { IntialSyncer().sync() }
-
-    //TODO: we should start this sync process ONCE the IntialSyncer has finished
-    async { HuginSyncer().sync() }
-    // async { BlockSyncer().sync() }
+    // will only get launched if we have the XKR_DISCORD_TOKEN env var set
+    // it is only set on the production server
+    val token = System.getenv("XKR_DISCORD_TOKEN")
+    if (!token.isNullOrEmpty()) {
+        launch { DiscordSyncer().sync() }
+    }
 }

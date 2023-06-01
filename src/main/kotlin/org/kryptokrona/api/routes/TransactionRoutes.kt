@@ -30,47 +30,114 @@
 
 package org.kryptokrona.api.routes
 
+import io.bkbn.kompendium.core.metadata.GetInfo
+import io.bkbn.kompendium.core.plugin.NotarizedRoute
+import io.bkbn.kompendium.json.schema.definition.TypeDefinition
+import io.bkbn.kompendium.oas.payload.Parameter
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
-import org.kryptokrona.api.services.TransactionServiceImpl
+import org.kryptokrona.api.models.Transaction
+import org.kryptokrona.api.models.response.ExceptionResponse
+import org.kryptokrona.api.models.response.ResultResponse
+import org.kryptokrona.api.services.transaction.TransactionServiceImpl
 import org.kryptokrona.api.utils.jsonObjectMapper
 
 private val service = TransactionServiceImpl()
 
 fun Route.transactionsRoute() {
-    get("/v1/transactions") {
-        val page = call.request.queryParameters["page"]?.toIntOrNull() ?: 1
-        val size = call.request.queryParameters["size"]?.toIntOrNull() ?: 10
+    route("/v1/transactions") {
+        allTransactionDocumentation()
 
-        val items = service.getAll(size, page)
-        val totalCount = service.getTotalCount()
+        route("") {
+            get {
+                val page = call.request.queryParameters["page"]?.toIntOrNull() ?: 1
+                val size = call.request.queryParameters["size"]?.toIntOrNull() ?: 10
 
-        val result = mapOf(
-            "items" to items,
-            "page" to page,
-            "size" to size,
-            "total" to totalCount
-        )
-        val json = jsonObjectMapper().writeValueAsString(result)
+                val items = service.getAll(size, page)
+                val totalCount = service.getTotalCount()
 
-        call.respond(HttpStatusCode.OK, json)
+                val result = ResultResponse(items, page, size, totalCount)
+                val json = jsonObjectMapper().writeValueAsString(result)
+
+                call.respond(HttpStatusCode.OK, json)
+            }
+        }
+
+        route("/{id}") {
+            getTransactionByIdDocumentation()
+
+            get {
+                val id = call.parameters["id"]?.toLongOrNull()
+
+                id?.let {
+                    val item = service.getById(id)
+
+                    item?.let {
+                        val json = jsonObjectMapper().writeValueAsString(item)
+
+                        call.respond(HttpStatusCode.Found, json)
+                    } ?: call.respond(HttpStatusCode.NotFound, "No block found with id $id")
+                } ?: call.respond(HttpStatusCode.BadRequest)
+            }
+        }
     }
 }
 
-fun Route.transactionsByIdRoute() {
-    get("/v1/transactions/{id}") {
-        val id = call.parameters["id"]?.toLongOrNull()
+private fun Route.allTransactionDocumentation() {
+    install(NotarizedRoute()) {
+        tags = setOf("transactions")
+        get = GetInfo.builder {
+            summary("Get all transactions")
+            description("Gets all transactions stored in the database.")
+            response {
+                responseCode(HttpStatusCode.OK)
+                responseType<ResultResponse>()
+                description("Will return all transactions.")
+            }
+            canRespond {
+                responseType<ExceptionResponse>()
+                responseCode(HttpStatusCode.BadRequest)
+                description("Could not handle the request.")
+            }
+            canRespond {
+                responseType<ExceptionResponse>()
+                responseCode(HttpStatusCode.InternalServerError)
+                description("Some serious trouble is going on.")
+            }
+        }
+    }
+}
 
-        id?.let {
-            val item = service.getById(id)
-
-            item?.let {
-                val json = jsonObjectMapper().writeValueAsString(item)
-
-                call.respond(HttpStatusCode.Found, json)
-            } ?: call.respond(HttpStatusCode.NotFound, "No block found with id $id")
-        } ?: call.respond(HttpStatusCode.BadRequest)
+private fun Route.getTransactionByIdDocumentation() {
+    install(NotarizedRoute()) {
+        tags = setOf("transactions")
+        parameters = listOf(
+            Parameter(
+                name = "id",
+                `in` = Parameter.Location.path,
+                schema = TypeDefinition.LONG
+            )
+        )
+        get = GetInfo.builder {
+            summary("Get a specific transaction by ID")
+            description("Get a specific transaction by ID stored in the database.")
+            response {
+                responseCode(HttpStatusCode.OK)
+                responseType<Transaction>()
+                description("Will return a transaction.")
+            }
+            canRespond {
+                responseType<ExceptionResponse>()
+                responseCode(HttpStatusCode.BadRequest)
+                description("Could not handle the request.")
+            }
+            canRespond {
+                responseType<ExceptionResponse>()
+                responseCode(HttpStatusCode.InternalServerError)
+                description("Some serious trouble is going on.")
+            }
+        }
     }
 }
